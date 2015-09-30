@@ -24,20 +24,28 @@ define(['exports', 'aurelia-loader', 'aurelia-metadata'], function (exports, _au
 
     TextTemplateLoader.prototype._createTemplateFromMarkup = function _createTemplateFromMarkup(markup) {
       var parser = document.createElement('div');
-      parser.innerHTML = markup;
-
+      if (typeof MSApp != 'undefined') {
+        MSApp.execUnsafeLocalFunction(function() {
+          parser.innerHTML = markup;
+        });
+      } else
+        parser.innerHTML = markup;
       var template = parser.firstElementChild;
-
       if (this.hasTemplateElement) {
         return template;
       }
+      if (typeof MSApp != 'undefined') {
+        MSApp.execUnsafeLocalFunction(function () {
+          parser.innerHTML = parser.firstElementChild.innerHTML.trim();
+        });
+      } else
+        parser.innerHTML = parser.firstElementChild.innerHTML.trim();
 
+      template = parser;
       template.content = document.createDocumentFragment();
-
       while (template.firstChild) {
         template.content.appendChild(template.firstChild);
       }
-
       HTMLTemplateElement.bootstrap(template);
       return template;
     };
